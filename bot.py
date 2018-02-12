@@ -14,7 +14,7 @@
 # logging.basicConfig(format='%(asctime)s - %(name)s -%(levelname)s - %(messge)s',
 #                     level=logging.INFO)
 
-# updater = Updater(token='513044196:AAEiWp1XZQ8bft-_HkL-_V-ylEd8P9libuk')
+# updater = Updater(token='')
 # dispatcher = updater.dispatcher
 
 # start_handler = CommandHandler('start', start)
