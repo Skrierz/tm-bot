@@ -97,16 +97,19 @@ def last_4():
 
 
 def week():
-    value = 0
+    up = 0
+    down = 0
     ids = get_row_count()
     data = ws().row_values(ids)
     while in_week(data[1]):
-        value = value + int(data[4])
+        if int(data[4]) >= 0:
+            up = up + int(data[4])
+        else:
+            down = down + int(data[4])
+        value = [up, down]
         ids = ids - 1
         data = ws().row_values(ids)
-    if value > 0:
-        value = '+' + str(value)
-    return str(value)
+    return value
 
 
 
