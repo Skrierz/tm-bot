@@ -79,9 +79,13 @@ def query_router(message_id, query_data):
         tm_bot().sendMessage(glob.chat_id, last_4())
         reload(glob)
     elif query_data == 'week':
-        s = 'Траты за неделю: ' + week()
+        week_data = week()
+        d = week_data[0] + week_data[1]
+        s = ('Траты за неделю: ' + str(week_data[1]) + '\nДоход за неделю: '
+             + str(week_data[0]) + '\nРазница: ' + str(d))
         tm_bot().sendMessage(glob.chat_id, s)
         reload(glob)
+
 
 
 def keyboard():
