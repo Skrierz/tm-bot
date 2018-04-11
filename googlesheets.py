@@ -1,6 +1,6 @@
 import gspread
 import re
-from time import strftime, localtime, strptime, time
+from time import strftime, localtime, strptime, time, sleep
 from oauth2client.service_account import ServiceAccountCredentials
 
 
@@ -69,7 +69,7 @@ def summ():
 
 
 def cards():
-    keys = ['Наличные Марины', 'Сбербанк Марины', 'Тинькофф', 'Стипендиальная',
+    keys = ['Наличные Марины', 'Сбербанк Марины', 'Тинькофф',
             'Наличные Андрея', 'Рокетбанк', 'Сбербанк Андрея', 'ПСКБ']
     d = dict.fromkeys(keys, 0)
     # print(d)
@@ -82,6 +82,7 @@ def cards():
         d[type_name] = d[type_name] + int(value)
         # print(d)
         # print(value)
+        sleep(0.5)
     return d
 
 
@@ -97,8 +98,7 @@ def last_4():
 
 
 def week():
-    up = 0
-    down = 0
+    up = down = 0
     ids = get_row_count()
     data = ws().row_values(ids)
     while in_week(data[1]):

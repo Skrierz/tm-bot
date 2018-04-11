@@ -1,7 +1,8 @@
 import time
 import telepot
 import glob
-from googlesheets import gs_add, summ, cards, last_4, week
+from mysql import Connect
+# from googlesheets import gs_add, summ, cards, last_4, week
 from imp import reload
 from pprint import pprint
 from telepot.loop import MessageLoop
@@ -76,13 +77,15 @@ def query_router(message_id, query_data):
         common()
         reload(glob)
     elif query_data == 'last_4':
-        tm_bot().sendMessage(glob.chat_id, last_4())
+        # tm_bot().sendMessage(glob.chat_id, last_4())
+        tm_bot().sendMessage(glob.chat_id, Connect().last_4())
         reload(glob)
     elif query_data == 'week':
-        week_data = week()
-        d = week_data[0] + week_data[1]
-        s = ('Траты за неделю: ' + str(week_data[1]) + '\nДоход за неделю: '
-             + str(week_data[0]) + '\nРазница: ' + str(d))
+        # week_data = week()
+        week_up, week_down = Connect().week()
+        d = week_up + week_down
+        s = ('Траты за неделю: ' + str(week_down) + '\nДоход за неделю: '
+             + str(week_up) + '\nРазница: ' + str(d))
         tm_bot().sendMessage(glob.chat_id, s)
         reload(glob)
 
@@ -143,8 +146,9 @@ def digit(data):
 
 
 def comment(data):
-    gs_add(*glob.collector(data))
-    print(glob.collector())
+    Connect().input(glob.collector(data))
+    # gs_add(*glob.collector(data))
+    print(glob.collector(data))
     tm_bot().sendMessage(glob.chat_id, 'Полученно')
     reload(glob)
 
@@ -187,8 +191,9 @@ def type_resolve(data):
 
 
 def common():
-    d = cards()
-    mes = ('Остаток: ' + str(summ()) + '\nНаличные Марины: '
+    summ, d = Connect().budget()
+    # d = cards()
+    mes = ('Остаток: ' + str(summ) + '\nНаличные Марины: '
            + str(d['Наличные Марины']) + '\nСбербанк Марины: '
            + str(d['Сбербанк Марины']) + '\nТинькофф: '
            + str(d['Тинькофф']) + '\nНаличные Андрея: '
@@ -215,7 +220,7 @@ if __name__ == '__main__':
 '''
 (доделать 2 кнопки и отправить костяну) дун
 сделать принт всех действий для логов
-(добавить на сервер русский яз) дун
+добавить на сервер русский яз
 добавить многопоточность по каждого пользователя
 не работает(перенести авторизацию в начало)/ добавить какую-нибудь другую авторизацию
 добавить команду старт/хелп для юзерфрендли
