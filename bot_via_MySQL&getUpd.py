@@ -2,7 +2,6 @@ import time
 import telepot
 import glob
 from mysql import Connect
-# from googlesheets import gs_add, summ, cards, last_4, week
 from imp import reload
 from pprint import pprint
 from telepot.loop import MessageLoop
@@ -12,7 +11,7 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 def tm_bot():
-    token = '513044196:AAEiWp1XZQ8bft-_HkL-_V-ylEd8P9libuk'
+    token = ''
     bot = telepot.Bot(token)
     return bot
 
@@ -147,7 +146,6 @@ def digit(data):
 
 def comment(data):
     Connect().input(glob.collector(data))
-    # gs_add(*glob.collector(data))
     print(glob.collector(data))
     tm_bot().sendMessage(glob.chat_id, 'Полученно')
     reload(glob)
@@ -192,7 +190,6 @@ def type_resolve(data):
 
 def common():
     summ, d = Connect().budget()
-    # d = cards()
     mes = ('Остаток: ' + str(summ) + '\nНаличные Марины: '
            + str(d['Наличные Марины']) + '\nСбербанк Марины: '
            + str(d['Сбербанк Марины']) + '\nТинькофф: '
@@ -215,22 +212,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-'''
-(доделать 2 кнопки и отправить костяну) дун
-сделать принт всех действий для логов
-добавить на сервер русский яз
-добавить многопоточность по каждого пользователя
-не работает(перенести авторизацию в начало)/ добавить какую-нибудь другую авторизацию
-добавить команду старт/хелп для юзерфрендли
-добавить удаление действий
-перевести на вебхуки
-перевести на бд
-добавить добавление неизвестных пользователей в отдельные логи
-
-
-
-
-Угу, а расширенный отчет ты не собираешься добавлять? По группам, типа: еда, развлечения, машина, квартплата и т.д.
-Сделай группировку расходов, что бы каждую группу можно было просматривать. Так удобнее смотреть. И можно статистику смотреть, куда больше тратишь.'''
