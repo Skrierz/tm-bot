@@ -14,7 +14,7 @@ def gs_auth():
 
 
 def ws():
-    ss = gs_auth().open_by_key('1-A06-OEBs48ientFmlSFO6m2EyvpiRcXwIXSz6E8k50')
+    ss = gs_auth().open_by_key('')
     ws = ss.sheet1
     return ws
 
@@ -111,26 +111,3 @@ def week():
         data = ws().row_values(ids)
     return value
 
-
-
-
-
-# def test():
-#     keys = ['Наличные Марины', 'Сбербанк Марины', 'Тинькофф', 'Стипендиальная',
-#             'Наличные Андрея', 'Рокетбанк', 'Сбербанк Андрея', 'ПСКБ']
-#     d = dict.fromkeys(keys, 0)
-#     for i in ws().range(2, 4, get_row_count(), 4):
-#         i = str(i)
-#         # type_name = re.split(r'\'', i)[1]
-#         # print(type_name)
-#         row_id = re.findall(r'\d+', i)
-#         # print(row_id)
-#         # cell = str(ws().cell(row_id, 5))
-#         # print(cell)
-#         # value = re.split(r'\'', cell)
-#         print(row_id)
-#         # d[type_name] = d[type_name] + int(value)
-
-
-# test()
-# print(get_time())
