@@ -34,7 +34,11 @@ class Connect:
         data = self.cur.fetchall()
         for string in data:
             summ += string['value']
-            d[string['type']] += string['value']
+            try:
+                d[string['type']] += string['value']
+            except KeyError as e:
+                d['error'] = [e]
+                print(d['error'])
         self.close()
         return summ, d
 
@@ -66,6 +70,36 @@ class Connect:
             data = self.cur.fetchone()
         self.close()
         return up, down
+
+    def lastid(self):
+        self.open()
+        lastid = self.cur.execute("SELECT * FROM budget_changes")
+        self.close()
+        return lastid
+
+    def get_row(self, idx):
+        self.open()
+        txt = "SELECT * FROM budget_changes WHERE id = {}".format(idx)
+        self.cur.execute(txt)
+        row = self.cur.fetchone()
+        self.close()
+        return row
+
+    def delete(self, idx):
+        lastid = Connect().lastid()
+        self.open()
+        txt = "DELETE FROM budget_changes WHERE id = {}".format(idx)
+        self.cur.execute(txt)
+        self.op.commit()
+        for i in range(idx, lastid):
+            txt = "UPDATE budget_changes SET id = {} WHERE "\
+                  "budget_changes.id = {}".format(i, i+1)
+            self.cur.execute(txt)
+            self.op.commit()
+        self.cur.execute("ALTER TABLE budget_changes AUTO_INCREMENT "
+                         "= {}".format(lastid-1))
+        self.op.commit()
+        self.close()
 
 
 def config(filename='config.ini', section='budget_changes'):

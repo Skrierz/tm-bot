@@ -1,18 +1,27 @@
 import time
 import telepot
+import telepot.api
 import glob
+import logging
+import urllib3
 from mysql import Connect
-# from googlesheets import gs_add, summ, cards, last_4, week
 from imp import reload
-from pprint import pprint
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineQueryResultArticle
 from telepot.namedtuple import InputTextMessageContent
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 
+def logs():
+    format = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+    logging.basicConfig(filename="main_log.log",
+                        level=logging.INFO,
+                        format=format)
+
+
 def tm_bot():
     token = '513044196:AAEiWp1XZQ8bft-_HkL-_V-ylEd8P9libuk'
+    telepot.api.set_proxy('http://104.46.34.250:3128')
     bot = telepot.Bot(token)
     return bot
 
@@ -51,8 +60,9 @@ def message(msg):
     elif glob.route == 2:
         comment(msg['text'])
     elif glob.route == 10:
-        Connect().delete(int(msg['text']))
-        reload(glob)
+        digit(msg['text'])
+    elif glob.route == 20:
+        digit(msg['text'])
 
 
 def callback_query(msg):
@@ -66,6 +76,9 @@ def query_router(message_id, query_data):
     msg_identifier = (glob.chat_id, message_id)
     types = ['yuki', 'yuki_sber', 'yuki_tink', 'my', 'my_rocket',
              'my_sber', 'my_pskb']
+    if query_data == 'edit':
+        tm_bot().editMessageText(msg_identifier, text='Что сделать?',
+                                 reply_markup=edit_keyboard())
     if query_data == 'add':
         tm_bot().editMessageText(msg_identifier, text='Куда добавить?',
                                  reply_markup=type_keyboard())
@@ -73,6 +86,10 @@ def query_router(message_id, query_data):
         tm_bot().editMessageText(msg_identifier,
                                  text='Введите id строки для удаления')
         glob.route = 10
+    elif query_data == 'show_row':
+        tm_bot().editMessageText(msg_identifier,
+                                 text='Введите id строки для просмотра')
+        glob.route = 20
     elif query_data == 'result':
         tm_bot().editMessageText(msg_identifier, text='Что именно интересует?',
                                  reply_markup=result_keyboard())
@@ -84,11 +101,9 @@ def query_router(message_id, query_data):
         common()
         reload(glob)
     elif query_data == 'last_4':
-        # tm_bot().sendMessage(glob.chat_id, last_4())
         tm_bot().sendMessage(glob.chat_id, Connect().last_4())
         reload(glob)
     elif query_data == 'week':
-        # week_data = week()
         week_up, week_down = Connect().week()
         d = week_up + week_down
         s = ('Траты за неделю: ' + str(week_down) + '\nДоход за неделю: '
@@ -98,11 +113,10 @@ def query_router(message_id, query_data):
 
 
 def keyboard():
-    add_butt = InlineKeyboardButton(text='Внести', callback_data='add')
-    del_butt = InlineKeyboardButton(text='Удалить запись',
-                                    callback_data='delete')
+    edit_butt = InlineKeyboardButton(text='Редактирование',
+                                     callback_data='edit')
     summ_butt = InlineKeyboardButton(text='Баланс', callback_data='result')
-    first_row = [add_butt, del_butt]
+    first_row = [edit_butt]
     second_row = [summ_butt]
     buttons = [first_row, second_row]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -143,6 +157,16 @@ def result_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
 
+def edit_keyboard():
+    add_butt = InlineKeyboardButton(text='Внести', callback_data='add')
+    show_row_butt = InlineKeyboardButton(text='Посмотреть строку',
+                                         callback_data='show_row')
+    del_butt = InlineKeyboardButton(text='Удалить строку',
+                                    callback_data='delete')
+    buttons = [[add_butt], [show_row_butt], [del_butt]]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard
+
 
 def digit(data):
     try:
@@ -150,9 +174,14 @@ def digit(data):
     except ValueError as e:
         tm_bot().sendMessage(glob.chat_id, 'Необходимо числовое значение')
     else:
-        glob.route = 2
-        glob.collector(data)
-        tm_bot().sendMessage(glob.chat_id, 'Введите комментарий:')
+        if glob.route == 1:
+            glob.route = 2
+            glob.collector(data)
+            tm_bot().sendMessage(glob.chat_id, 'Введите комментарий:')
+        elif glob.route == 10:
+            delete(data)
+        elif glob.route == 20:
+            show_row(data)
 
 
 def comment(data):
@@ -202,7 +231,8 @@ def type_resolve(data):
 
 def common():
     summ, d = Connect().budget()
-    # d = cards()
+    if d['error']:
+        tm_bot().sendMessage(glob.chat_id, 'Возникла ошибка в данных')
     mes = ('Остаток: ' + str(summ) + '\nНаличные Марины: '
            + str(d['Наличные Марины']) + '\nСбербанк Марины: '
            + str(d['Сбербанк Марины']) + '\nТинькофф: '
@@ -213,12 +243,49 @@ def common():
     tm_bot().sendMessage(glob.chat_id, mes)
 
 
-def main():
-    MessageLoop(tm_bot(), {'inline_query': on_inline_query,
-                           'chosen_inline_result': on_chosen_inline_result,
-                           'chat': message,
-                           'callback_query': callback_query}).run_as_thread()
+def delete(data):
+    if Connect().lastid() >= data > 0:
+        row = Connect().get_row(data)
+        mes = "{0[id]} {0[date]} {0[name]} {0[type]} {0[value]} "\
+              "{0[comment]}".format(row)
+        Connect().delete(data)
+        tm_bot().sendMessage(glob.chat_id, 'Удалена строка: {}'.format(mes))
+        print('Пользователь: ', glob.values[0])
+        print('Удалена строка: {}'.format(mes))
+        reload(glob)
+    else:
+        tm_bot().sendMessage(glob.chat_id, 'Такого id не существует. '
+                             'Введите валидный id.')
 
+
+def show_row(data):
+    if Connect().lastid() >= data > 0:
+        row = Connect().get_row(data)
+        mes = "{0[id]} {0[date]} {0[name]} {0[type]} {0[value]} "\
+              "{0[comment]}".format(row)
+        tm_bot().sendMessage(glob.chat_id,
+                             'Интересующая строка: {}'.format(mes))
+        print('Пользователь: ', glob.values[0])
+        print('Посмотрел строку: {}'.format(mes))
+        reload(glob)
+    else:
+        tm_bot().sendMessage(glob.chat_id, 'Такого id не существует. '
+                             'Введите валидный id.')
+
+
+def main():
+    logs()
+    try:
+        MessageLoop(tm_bot(), {'inline_query': on_inline_query,
+                               'chosen_inline_result': on_chosen_inline_result,
+                               'chat': message,
+                               'callback_query': callback_query}
+                    ).run_as_thread(relax=0.5,  timeout=1)
+    except urllib3.exceptions.MaxRetryError as e:
+        logging.warning(e)
+        telepot.api.set_proxy('http://51.254.45.80:3128')
+    else:
+        telepot.api.set_proxy('http://104.46.34.250:3128')
     while 1:
         time.sleep(10)
 
@@ -235,10 +302,13 @@ if __name__ == '__main__':
 добавить многопоточность по каждого пользователя
 не работает(перенести авторизацию в начало)/ добавить какую-нибудь другую авторизацию
 добавить команду старт/хелп для юзерфрендли
-добавить удаление действий
+(добавить удаление действий) переделать, что-бы удаленное скидывалось в отдельную бд, а не удалялось
 перевести на вебхуки
 (перевести на бд) дун
 добавить добавление неизвестных пользователей в отдельные логи
+сделать переключение прокси при отваливании
+засунуть просмотр по ид в баланс, а удаление в добавление
+
 
 
 
