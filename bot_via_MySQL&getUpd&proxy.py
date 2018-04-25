@@ -224,7 +224,9 @@ def type_resolve(data):
 
 def common():
     summ, d = Connect().budget()
-    if d['error']:
+    try:
+        d['error']
+    except KeyError:
         tm_bot().sendMessage(glob.chat_id, 'Возникла ошибка в данных')
     mes = ('Остаток: ' + str(summ) + '\nНаличные Марины: '
            + str(d['Наличные Марины']) + '\nСбербанк Марины: '
