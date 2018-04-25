@@ -2,8 +2,8 @@ import time
 import telepot
 import telepot.api
 import glob
-import logging
 import urllib3
+from logger import Logger
 from mysql import Connect
 from imp import reload
 from telepot.loop import MessageLoop
@@ -282,10 +282,11 @@ def main():
                                'callback_query': callback_query}
                     ).run_as_thread(relax=0.5,  timeout=1)
     except urllib3.exceptions.MaxRetryError as e:
-        logging.warning(e)
+        Logger.connection_logs(e)
         telepot.api.set_proxy('http://51.254.45.80:3128')
-    else:
-        telepot.api.set_proxy('http://104.46.34.250:3128')
+    # else:
+    #     telepot.api.set_proxy('http://104.46.34.250:3128')
+
     while 1:
         time.sleep(10)
 
