@@ -12,13 +12,6 @@ from telepot.namedtuple import InputTextMessageContent
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-def logs():
-    format = "%(asctime)s %(levelname)s %(name)s: %(message)s"
-    logging.basicConfig(filename="main_log.log",
-                        level=logging.INFO,
-                        format=format)
-
-
 def tm_bot():
     token = ''
     telepot.api.set_proxy('http://104.46.34.250:3128')
@@ -274,7 +267,6 @@ def show_row(data):
 
 
 def main():
-    logs()
     try:
         MessageLoop(tm_bot(), {'inline_query': on_inline_query,
                                'chosen_inline_result': on_chosen_inline_result,
