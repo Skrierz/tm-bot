@@ -95,12 +95,18 @@ def query_router(message_id, query_data):
         reload(glob)
     elif query_data == 'last_4':
         tm_bot().sendMessage(glob.chat_id, Connect().last_4())
+        log_string = ('Пользователь {0} посмотрел посление 4 действия'
+                      .format(glob.values[0]))
+        Logger().actions_log(log_string)
         reload(glob)
     elif query_data == 'week':
         week_up, week_down = Connect().week()
         d = week_up + week_down
         s = ('Траты за неделю: ' + str(week_down) + '\nДоход за неделю: '
              + str(week_up) + '\nРазница: ' + str(d))
+        log_string = ('Пользователь {0} посмотрел данные за неделю'
+                      .format(glob.values[0]))
+        Logger().actions_log(log_string)
         tm_bot().sendMessage(glob.chat_id, s)
         reload(glob)
 
@@ -150,6 +156,7 @@ def result_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
 
+
 def edit_keyboard():
     add_butt = InlineKeyboardButton(text='Внести', callback_data='add')
     show_row_butt = InlineKeyboardButton(text='Посмотреть строку',
@@ -179,9 +186,11 @@ def digit(data):
 
 def comment(data):
     Connect().input(glob.collector(data))
-    # gs_add(*glob.collector(data))
-    print(glob.collector(data))
+    print(glob.collector())
     tm_bot().sendMessage(glob.chat_id, 'Полученно')
+    log_string = ('Пользователь {0} добавил строку {1}'
+                  .format(glob.values[0], glob.collector()))
+    Logger().actions_log(log_string)
     reload(glob)
 
 
@@ -227,6 +236,8 @@ def common():
     try:
         d['error']
     except KeyError:
+        pass
+    else:
         tm_bot().sendMessage(glob.chat_id, 'Возникла ошибка в данных')
     mes = ('Остаток: ' + str(summ) + '\nНаличные Марины: '
            + str(d['Наличные Марины']) + '\nСбербанк Марины: '
@@ -235,18 +246,21 @@ def common():
            + str(d['Наличные Андрея']) + '\nРокетбанк: '
            + str(d['Рокетбанк']) + '\nСбербанк Андрея: '
            + str(d['Сбербанк Андрея']) + '\nПСКБ: ' + str(d['ПСКБ']))
+    log_string = 'Пользователь {0} посмотрел бюджет'.format(glob.values[0])
+    Logger().actions_log(log_string)
     tm_bot().sendMessage(glob.chat_id, mes)
 
 
 def delete(data):
     if Connect().lastid() >= data > 0:
         row = Connect().get_row(data)
-        mes = "{0[id]} {0[date]} {0[name]} {0[type]} {0[value]} "\
-              "{0[comment]}".format(row)
+        mes = ("{0[id]} {0[date]} {0[name]} {0[type]} {0[value]} "
+               "{0[comment]}".format(row))
         Connect().delete(data)
         tm_bot().sendMessage(glob.chat_id, 'Удалена строка: {}'.format(mes))
-        print('Пользователь: ', glob.values[0])
-        print('Удалена строка: {}'.format(mes))
+        log_string = ("Пользователь {0} удалил строку {1}"
+                      .format(glob.values[0], mes))
+        Logger().actions_log(log_string)
         reload(glob)
     else:
         tm_bot().sendMessage(glob.chat_id, 'Такого id не существует. '
@@ -256,12 +270,13 @@ def delete(data):
 def show_row(data):
     if Connect().lastid() >= data > 0:
         row = Connect().get_row(data)
-        mes = "{0[id]} {0[date]} {0[name]} {0[type]} {0[value]} "\
-              "{0[comment]}".format(row)
+        mes = ("{0[id]} {0[date]} {0[name]} {0[type]} {0[value]} "
+               "{0[comment]}".format(row))
         tm_bot().sendMessage(glob.chat_id,
                              'Интересующая строка: {}'.format(mes))
-        print('Пользователь: ', glob.values[0])
-        print('Посмотрел строку: {}'.format(mes))
+        log_string = ("Пользователь {0} посмотрел строку {1}"
+                      .format(glob.values[0], mes))
+        Logger().actions_log(log_string)
         reload(glob)
     else:
         tm_bot().sendMessage(glob.chat_id, 'Такого id не существует. '
@@ -276,11 +291,10 @@ def main():
                                'callback_query': callback_query}
                     ).run_as_thread(relax=0.5,  timeout=1)
     except urllib3.exceptions.MaxRetryError as e:
-        Logger.connection_logs(e)
-        telepot.api.set_proxy('http://51.254.45.80:3128')
+        Logger.errors_log(e)
+        # telepot.api.set_proxy('http://51.254.45.80:3128')
     # else:
     #     telepot.api.set_proxy('http://104.46.34.250:3128')
-
     while 1:
         time.sleep(10)
 
