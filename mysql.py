@@ -88,6 +88,10 @@ class Connect:
     def delete(self, idx):
         lastid = Connect().lastid()
         self.open()
+        txt = ('INSERT INTO deleted SELECT * FROM budget_changes WHERE id = {}'
+               .format(idx))
+        self.cur.execute(txt)
+        self.op.commit()
         txt = "DELETE FROM budget_changes WHERE id = {}".format(idx)
         self.cur.execute(txt)
         self.op.commit()
