@@ -292,6 +292,16 @@ def main():
                     ).run_as_thread(relax=0.5,  timeout=1)
     except urllib3.exceptions.MaxRetryError as e:
         Logger.errors_log(e)
+        print('MaxRetryError')
+    except urllib3.exceptions.ReadTimeoutError as e:
+        Logger.errors_log(e)
+        print('ReadTimeoutError')
+    except telepot.exception.BadHTTPResponse as e:
+        Logger.errors_log(e)
+        print('BadHTTPResponse')
+    except Exception as e:
+        Logger.errors_log(e)
+        print('New error')
         # telepot.api.set_proxy('http://51.254.45.80:3128')
     # else:
     #     telepot.api.set_proxy('http://104.46.34.250:3128')
