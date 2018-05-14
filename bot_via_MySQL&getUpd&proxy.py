@@ -186,8 +186,10 @@ def digit(data):
 
 def comment(data):
     Connect().input(glob.collector(data))
+    lastid = Connect().lastid()
     print(glob.collector())
-    tm_bot().sendMessage(glob.chat_id, 'Полученно')
+    message = 'Добавлена строка: {0} {1}'.format(lastid, glob.collector())
+    tm_bot().sendMessage(glob.chat_id, message)
     log_string = ('Пользователь {0} добавил строку {1}'
                   .format(glob.values[0], glob.collector()))
     Logger().actions_log(log_string)
