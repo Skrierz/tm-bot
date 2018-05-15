@@ -3,6 +3,7 @@ import telepot
 import telepot.api
 import glob
 import urllib3
+from pprint import pprint
 from logger import Logger
 from mysql import Connect
 from imp import reload
@@ -46,6 +47,8 @@ def on_chosen_inline_result(msg):
 
 
 def message(msg):
+    if msg['text'] == 'Здравствуйте':
+        reload(glob)
     # pprint(msg)
     glob.chat_id = msg['chat']['id']
     if glob.route == 1:
