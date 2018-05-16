@@ -13,26 +13,27 @@ from telepot.namedtuple import InputTextMessageContent
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-def tm_bot():
-    token = ''
-    telepot.api.set_proxy('http://104.46.34.250:3128')
+def tm_bot(*arg):
+    token = '513044196:AAEiWp1XZQ8bft-_HkL-_V-ylEd8P9libuk'
+    telepot.api.set_proxy('http://51.254.45.80:3128')
     bot = telepot.Bot(token)
     return bot
 
 
 def on_inline_query(msg):
-    reload(glob)
-    query_id = msg['id']
-    # pprint(msg)
-    articles = [InlineQueryResultArticle(
-                    id='finance',
-                    title='Финансы',
-                    input_message_content=InputTextMessageContent(
-                        message_text='Здравствуйте'
-                    )
-               )]
-
-    tm_bot().answerInlineQuery(query_id, articles)
+    def func():
+        # reload(glob)
+        # pprint(msg)
+        articles = [InlineQueryResultArticle(
+                        id='finance',
+                        title='Финансы',
+                        input_message_content=InputTextMessageContent(
+                            message_text='Здравствуйте'
+                        )
+                   )]
+        return articles
+    answerer = telepot.helper.Answerer(tm_bot())
+    answerer.answer(msg, func)
 
 
 def on_chosen_inline_result(msg):
