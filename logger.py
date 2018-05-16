@@ -2,8 +2,11 @@ import logging
 
 
 class Logger:
-    def __init__(self):
+
+    def err_init(self):
         self.err_logger = logging.getLogger('errors')
+
+    def act_int(self):
         self.act_logger = logging.getLogger('actions')
 
     def errors(self):
@@ -26,11 +29,13 @@ class Logger:
         self.file_handler.setFormatter(self.formatter)
 
     def errors_log(self, arg):
+        self.err_int()
         if not self.err_logger.hasHandlers():
             self.errors()
         self.err_logger.warning(arg)
 
     def actions_log(self, arg):
+        self.act_int()
         if not self.act_logger.hasHandlers():
             self.actions()
         self.act_logger.info(arg)
