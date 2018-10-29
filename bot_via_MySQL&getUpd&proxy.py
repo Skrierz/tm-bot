@@ -308,9 +308,6 @@ def main():
     except Exception as e:
         Logger.errors_log(e)
         print('New error')
-        # telepot.api.set_proxy('http://51.254.45.80:3128')
-    # else:
-    #     telepot.api.set_proxy('http://104.46.34.250:3128')
     while 1:
         time.sleep(10)
 
