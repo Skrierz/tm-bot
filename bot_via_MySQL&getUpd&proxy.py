@@ -14,7 +14,7 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 def tm_bot(*arg):
-    token = '513044196:AAEiWp1XZQ8bft-_HkL-_V-ylEd8P9libuk'
+    token = ''
     telepot.api.set_proxy('http://51.254.45.80:3128')
     bot = telepot.Bot(token)
     return bot
